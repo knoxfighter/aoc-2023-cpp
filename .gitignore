@@ -505,3 +505,6 @@ vcpkg_installed/
 
 # local overrides
 Directory.Build.props
+
+# ignore the input files
+inputs
