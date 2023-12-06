@@ -86,7 +86,7 @@ TEST(Day2, Part1Splits) {
 
 	std::cout << result << std::endl;
 
-	std::cout << std::format("Took {}ns", std::accumulate(times.begin(), times.end(), 0)) << std::endl;
+	std::cout << std::format("Took {}ns", std::accumulate(times.begin(), times.end(), 0ull)) << std::endl;
 }
 
 TEST(Day2, Part1Manual) {
@@ -178,5 +178,76 @@ TEST(Day2, Part1Manual) {
 
 	std::cout << result << std::endl;
 
-	std::cout << std::format("Took {}ns", std::accumulate(times.begin(), times.end(), 0)) << std::endl;
+	std::cout << std::format("Took {}ns", std::accumulate(times.begin(), times.end(), 0ull)) << std::endl;
+}
+
+TEST(Day2, Part2Splits) {
+	std::ifstream inputFile("../../inputs/day2.txt");
+
+	ASSERT_TRUE(inputFile.is_open());
+
+	int result = 0;
+	std::vector<uint64_t> times;
+	std::string line;
+	while (std::getline(inputFile, line)) {
+		const auto& start = std::chrono::steady_clock::now();
+		std::unordered_map<std::string, int> maxCubes;
+		int i = 0;
+		int lineNum = 0;
+		for (const auto& lineSplit : std::views::split(line, ':')) {
+			switch (i) {
+				case 0: {
+					// this is the first part of the input (Game X)
+					int j = 0;
+					for (const auto& gameSplit : std::views::split(lineSplit, ' ')) {
+						//						std::cout << std::string_view(gameSplit) << std::endl;
+						switch (j) {
+							case 1:
+								std::from_chars(gameSplit.data(), gameSplit.data() + gameSplit.size(), lineNum);
+								break;
+						}
+						++j;
+					}
+					break;
+				}
+				case 1:
+					// the second part, where everything happens
+					for (const auto& roundSplit : std::views::split(lineSplit, ';')) {
+						for (const auto& cubeSplit : std::views::split(roundSplit, ',')) {
+							int j = 0;
+							std::string colour;
+							int amount;
+							for (const auto& dataSplit : std::views::split(cubeSplit, ' ') | std::views::drop(1)) {
+								switch (j) {
+									case 0:
+										// this is the number of the input
+										std::from_chars(dataSplit.data(), dataSplit.data() + dataSplit.size(), amount);
+										// missing error handling
+										break;
+									case 1:
+										// this is the colour of the input
+										colour = std::string_view(dataSplit);
+										break;
+								}
+								++j;
+							}
+							if (amount > maxCubes[colour]) {
+								maxCubes[colour] = amount;
+							}
+						}
+					}
+					break;
+			}
+			++i;
+		}
+
+		result += maxCubes["red"] * maxCubes["green"] * maxCubes["blue"];
+
+		const auto& end = std::chrono::steady_clock::now();
+		times.push_back((end - start).count());
+	}
+
+	std::cout << result << std::endl;
+
+	std::cout << std::format("Took {}ns", std::accumulate(times.begin(), times.end(), 0ull)) << std::endl;
 }
